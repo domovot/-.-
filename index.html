@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Квест-гра: Кібергерой</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background-color: #f0f8ff;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 { font-size: 3em; margin-bottom: 20px; }
+    .header-logos {
+  display: flex;
+  justify-content: space-between; /* логотипи по краях */
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.header-logos img {
+  height: 60px;
+}
+    .heroes {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      flex-wrap: wrap;
+    }
+    .hero {
+      border: 2px solid #ccc;
+      border-radius: 10px;
+      padding: 20px;
+      width: 250px;
+      background: white;
+    }
+    .hero img {
+      width: 200px;
+      height: 200px;
+      object-fit: cover;
+      border-radius: 10px;
+    }
+    .hero button {
+      margin-top: 15px;
+      padding: 10px 20px;
+      font-size: 1em;
+      cursor: pointer;
+      border: none;
+      background-color: #0077cc;
+      color: white;
+      border-radius: 5px;
+    }
+    .hero button:hover { background-color: #005fa3; }
+    #game-screen { margin-top: 30px; }
+    #hero-image {
+      margin-top: 20px;
+      width: 200px;
+      height: 200px;
+      object-fit: cover;
+      border-radius: 10px;
+    }
+.author-popup-container {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  font-family: Arial, sans-serif;
+  z-index: 1000;
+}
+
+.author-btn {
+  background-color: rgba(0, 123, 255, 0.7); /* Напівпрозорий синій */
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+
+.author-btn:hover {
+  background-color: rgba(0, 123, 255, 1); /* Яскравіший при наведенні */
+}
+
+.author-popup {
+  position: absolute;
+  bottom: 50px; /* Відступ над кнопкою */
+  right: 0;
+  width: 220px;
+  background: #222;
+  color: #fff;
+  padding: 10px 15px;
+  border-radius: 8px;
+  font-size: 14px;
+  opacity: 0;
+  pointer-events: none; /* Не клікабельний, поки не показаний */
+  transition: opacity 0.3s ease;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+}
+
+/* Показуємо попап при наведенні на кнопку або контейнер */
+.author-popup-container:hover .author-popup {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+    button.option {
+      display: block;
+      margin: 10px auto;
+      padding: 10px 20px;
+      font-size: 1em;
+      border: none;
+      border-radius: 5px;
+      background-color: #0077cc;
+      color: white;
+      cursor: pointer;
+    }
+    button.option:hover { background-color: #005fa3; }
+  </style>
+</head>
+<body>
+<div class="header-logos">
+  <img src="https://tnpu.edu.ua/about/tnpu_logo_round2_ukr.png" alt="Логотип зліва" />
+  <img src="https://tnpu.edu.ua/faculty/fizmat/fizmat-tnpu-logo.svg" alt="Логотип справа" />
+</div>
+  <div id="main-page">
+   
+    <h1>Квест-гра: Кібергерой</h1>
+    <p>ОБЕРИ ГЕРОЯ:</p>
+    <div class="heroes">
+      <div class="hero">
+        <img src="https://i.ibb.co/7J3HfPPs/image.png" alt="Учень">
+        <h3>Учень</h3>
+        <button onclick="startGame('pupil')">Почати гру</button>
+      </div>
+      <div class="hero">
+        <img src="https://i.ibb.co/Kxdckd3n/image.png" alt="Студент">
+        <h3>Студент</h3>
+        <button onclick="startGame('student')">Почати гру</button>
+      </div>
+      <div class="hero">
+        <img src="https://i.ibb.co/pBG9vK0j/image.png" alt="Викладач">
+        <h3>Викладач</h3>
+        <button onclick="startGame('teacher')">Почати гру</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="game-screen" style="display: none;">
+    <h2 id="role-title"></h2>
+    <img id="hero-image" src="" alt="Фото героя" />
+    <div id="question-box"></div>
+  </div>
+
+<div class="author-popup-container">
+  <button class="author-btn" title="Інформація про автора">🛈</button>
+  <div class="author-popup">
+    <p>Автор сайту: Ярослав Федорків <br>Контакт: +380979024590 </p>
+  </div>
+</div>
+
+  <script>
+    const questions = {
+      pupil: [
+        {
+          text: "Тобі надійшло повідомлення від незнайомця з проханням додати його в друзі.",
+          options: [
+            { text: "Приймаю", correct: false },
+            { text: "Ігнорую", correct: true },
+            { text: "Відповідаю: «Хто ти?»", correct: false }
+          ]
+        },
+        {
+          text: "Тобі пропонують перейти за посиланням для виграшу телефону.",
+          options: [
+            { text: "Перехожу", correct: false },
+            { text: "Не переходжу", correct: true },
+            { text: "Надсилаю друзям", correct: false }
+          ]
+         },
+        {
+          text: "Тобі пропонують завантажити гру з невідомого сайту, бо вона безкоштовна і крута.",
+          options: [
+            { text: "Відмовляюсь", correct: true },
+            { text: "Завантажую", correct: false },
+            { text: "Прошу версію для телефону", correct: false }
+	  ]
+         },
+        {
+          text: "На сайті висвітлилось повідомлення: Ваш комп'ютер заражено! Натисніть тут, щоб очистити!",
+          options: [
+            { text: "Натискаю Очистити", correct: false },
+            { text: "Закриваю сайт", correct: true },
+            { text: "Перевантажую комп'ютер", correct: false }
+          ]
+        },
+        {
+          text: "У комп’ютерному класі ти помічаєш, що комп’ютер залишили увімкненим з відкритим акаунтом.",
+          options: [
+            { text: "Нічого не роблю", correct: false },
+            { text: "Пишу щось від його імені", correct: false },
+            { text: "Повідомляю вчителя", correct: true }
+          ]
+        }
+      ],
+      student: [
+        {
+          text: "Отримано лист від викладача з підозрілою адресою. Що ти зробиш?",
+          options: [
+            { text: "Перевірю адресу та не відкриватиму вкладення", correct: true },
+            { text: "Одразу відкриваю файл", correct: false },
+            { text: "Пересилаю листа одногрупникам", correct: false }
+          ]
+        },
+        {
+          text: "Під час завантаження безкоштовної курсової роботи сайт просить встановити розширення в браузер.",
+          options: [
+            { text: "Встановлюю", correct: false },
+            { text: "Відмовляюсь і закриваю сайт", correct: true },
+            { text: "Пробую в іншому браузері", correct: false }
+ ]
+        },
+        {
+          text: "Тобі пропонують встановити безкоштовний VPN з незнайомого сайту.",
+          options: [
+            { text: "Скачую", correct: false },
+            { text: "Шукаю офіційний сайт або не встановлюю", correct: true },
+            { text: "Прошу когось іншого встановити", correct: false }
+ ]
+        },
+        {
+          text: "Ти бачиш новину з сенсаційним заголовком: “Завтра скасують заняття по всій країні!”",
+          options: [
+            { text: "Одразу поширюю в соціальних мережах", correct: false },
+            { text: "Додаю коментар: 100% правда!", correct: false },
+            { text: "Перевіряю інформацію на офіційних сайтах", correct: true }
+          ]
+        },
+        {
+          text: "Тобі приходить SMS або повідомлення в месенджері: «Ваш банк просить підтвердити дані акаунту».",
+          options: [
+            { text: "Вводжу дані", correct: false },
+            { text: "Ігнорую та перевіряю офіційний сайт банку", correct: true },
+            { text: "Телефоную за вказаним номером", correct: false }
+          ]
+        }
+      ],
+      teacher: [
+        {
+          text: "Студент просить ваш пароль, аби щось показати на комп’ютері.",
+          options: [
+            { text: "Надаю пароль", correct: false },
+            { text: "Відмовляю та контролюю дії сам", correct: true },
+            { text: "Прошу записати на папірці", correct: false }
+          ]
+        },
+        {
+          text: "Отримали спам з вірусом у вкладенні. Що робити?",
+          options: [
+            { text: "Відкриваю — раптом важливо", correct: false },
+            { text: "Видаляю повідомлення і додаю відправника у спам", correct: true },
+            { text: "Видаляю і забуваю", correct: false }
+]
+        },
+        {
+          text: "Хтось із студентів повідомляє, що на сайті факультету з’явилася дивна реклама.",
+          options: [
+            { text: "Ігнорую", correct: false },
+            { text: "Пишу всім: На сайті зламали щось!", correct: false },
+            { text: "Повідомляю ІТ-відділ або адміністратора", correct: true }
+]
+        },
+        {
+          text: "Колега надсилає Вам посилання на спільний доступ до документа, але адреса сайту виглядає дивно",
+          options: [
+            { text: "Не відкриваю і уточнюю в колеги", correct: true },
+            { text: "Відкриваю, бо “це ж знайомий”", correct: false },
+            { text: "Даю доступ до свого Диска", correct: false }
+          ]
+        },
+        {
+          text: "В аудиторії виявили сторонній USB у комп’ютері.",
+          options: [
+            { text: "Перевіряю вміст", correct: false },
+            { text: "Передаю ІТ-відповідальному", correct: true },
+            { text: "Використовую для власної презентації", correct: false }
+          ]
+        }
+      ]
+    };
+      const heroImages = {
+      pupil: "https://i.ibb.co/7J3HfPPs/image.png",
+      student: "https://i.ibb.co/Kxdckd3n/image.png",
+      teacher: "https://i.ibb.co/pBG9vK0j/image.png"
+    };
+
+    let currentRole = "";
+    let currentQuestion = 0;
+
+    function startGame(role) {
+      currentRole = role;
+      currentQuestion = 0;
+      document.getElementById("main-page").style.display = "none";
+      document.getElementById("game-screen").style.display = "block";
+      document.getElementById("role-title").innerText = "Герой: " + getRoleName(role);
+      document.getElementById("hero-image").src = heroImages[role];
+      showQuestion();
+    }
+
+    function getRoleName(role) {
+      return role === "pupil" ? "Учень" : role === "student" ? "Студент" : "Викладач";
+    }
+
+    function showQuestion() {
+      const container = document.getElementById("question-box");
+      const question = questions[currentRole][currentQuestion];
+      let html = `<p><strong>Питання ${currentQuestion + 1}:</strong> ${question.text}</p>`;
+      question.options.forEach(opt => {
+        html += `<button class="option" onclick="handleAnswer(${opt.correct})">${opt.text}</button>`;
+      });
+      container.innerHTML = html;
+    }
+
+    function handleAnswer(isCorrect) {
+      const container = document.getElementById("question-box");
+      if (isCorrect) {
+        currentQuestion++;
+        if (currentQuestion < questions[currentRole].length) {
+          showQuestion();
+        } else {
+          container.innerHTML = `<p><strong>Вітаємо! Ви успішно пройшли квест!</strong></p>
+          <button onclick="location.reload()">Почати спочатку</button>`;
+        }
+      } else {
+        container.innerHTML = `<p><strong>Неправильна відповідь. Гру завершено.</strong></p>
+        <button onclick="location.reload()">Спробувати знову</button>`;
+      }
+    }
+  </script>
+
+</body>
+</html>
